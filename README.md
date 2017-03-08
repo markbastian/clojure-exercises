@@ -1,10 +1,11 @@
 # clojure-exercises
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure project in which I collect my solutions to a variety of Clojure 
+puzzlers as well as come up with some of my own exercises and their explanations.
 
-## Usage
+## TODO
 
-FIXME
+Get all of my solutions from 4Clojure imported and organized.
 
 ## License
 
