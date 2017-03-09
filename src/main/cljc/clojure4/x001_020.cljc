@@ -1,4 +1,4 @@
-(ns clojure4.x001-018-elementary-exercises)
+(ns clojure4.x001-020)
 
 ;http://www.4clojure.com/problem/1
 ;Nothing but the Truth
@@ -108,4 +108,24 @@
 ;Sequences: filter
 (let [__ '(6 7)]
   (assert (= __ (filter #(> % 5) '(3 4 5 6 7)))))
+
+;http://www.4clojure.com/problem/19
+;Last Element
+(let [__ #(first (reverse %))]
+  (assert (= (__ [1 2 3 4 5]) 5))
+  (assert (= (__ '(5 4 3)) 3))
+  (assert (= (__ ["b" "c" "d"]) "d")))
+
+;Alternate solution using composition
+(let [__ (comp first reverse)]
+  (assert (= (__ [1 2 3 4 5]) 5))
+  (assert (= (__ '(5 4 3)) 3))
+  (assert (= (__ ["b" "c" "d"]) "d")))
+
+;http://www.4clojure.com/problem/20
+;Penultimate Element
+(let [__ #(-> % butlast last)]
+  (assert (= (__ (list 1 2 3 4 5)) 4))
+  (assert (= (__ ["a" "b" "c"]) "b"))
+  (assert (= (__ [[1 2] [3 4]]) [1 2])))
 
