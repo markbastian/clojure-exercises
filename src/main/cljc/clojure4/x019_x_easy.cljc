@@ -149,4 +149,13 @@
   (assert (= (__ [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4])))
   (assert (= (__ [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4]))))
 
+;http://www.4clojure.com/problem/33
+;Replicate a Sequence
+(let [__ #(if (= 1 %2) %1 (apply interleave (repeat %2 %1)))]
+  (assert (= (__ [1 2 3] 2) '(1 1 2 2 3 3)))
+  (assert (= (__ [:a :b] 4) '(:a :a :a :a :b :b :b :b)))
+  (assert (= (__ [4 5 6] 1) '(4 5 6)))
+  (assert (= (__ [[1 2] [3 4]] 2) '([1 2] [1 2] [3 4] [3 4])))
+  (assert (= (__ [44 33] 2) [44 44 33 33])))
+
 
