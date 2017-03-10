@@ -42,7 +42,7 @@
   (assert (= true (__ true true true false))))
 
 ;TODO
-;;http://www.4clojure.com/problem/85
+;;http://www.4clojure.com/problem/84
 ;Transitive Closure
 #_(let [__ false]
   (assert (let [divides #{[8 4] [9 3] [4 2] [27 9]}]
@@ -106,7 +106,20 @@
 ;TODO
 ;http://www.4clojure.com/problem/89
 ;Graph Tour
-#_(let [__ false]
+;Note: update-in and not= nil were used in place of update and some? due to lack of 4clojure support.
+(let [__ (letfn [(expand [paths]
+                   (for [{:keys [path remaining-edges] :as m} paths
+                         :let [f #{(peek path)}]
+                         unvisited (filter (fn [edge] (some f edge)) remaining-edges)
+                         :let [n (first (remove f unvisited))
+                               [a b] (split-with (complement #{unvisited}) remaining-edges)]]
+                     (-> m
+                         (update-in [:path] conj n)
+                         (assoc :remaining-edges (into a (rest b))))))]
+           (fn [edges]
+             (let [vertices (distinct (flatten edges))
+                   starts (map (fn [p] {:path [p] :remaining-edges edges}) vertices)]
+               (not= nil (not-empty (nth (iterate expand starts) (count edges)))))))]
     (assert (= true (__ [[:a :b]])))
     (assert (= false (__ [[:a :a] [:b :b]])))
     (assert (= false (__ [[:a :b] [:a :b] [:a :c] [:c :a]
@@ -128,6 +141,196 @@
              #{[1 4] [2 4] [3 4] [1 5] [2 5] [3 5]}))
   (assert (= 300 (count (__ (into #{} (range 10))
                             (into #{} (range 30)))))))
+
+;http://www.4clojure.com/problem/91
+;Graph Connectivity
+;Note: 4Clojure requires distinct elements when calling hash-set
+(let [__
+      (fn [edges]
+        (let [vertices (apply hash-set (distinct (flatten (seq edges))))]
+          (loop [visited #{(first vertices)} remaining edges]
+            (if (= visited vertices)
+              true
+              (let [{:keys [can-visit later]} (group-by #(if (some visited %) :can-visit :later) remaining)]
+                (if (empty? can-visit)
+                  false
+                  (recur (apply conj visited (flatten can-visit)) (apply hash-set later))))))))]
+  (assert (= true (__ #{[:a :a]})))
+  (assert (= true (__ #{[:a :b]})))
+  (assert (= false (__ #{[1 2] [2 3] [3 1] [4 5] [5 6] [6 4]})))
+  (assert (= true (__ #{[1 2] [2 3] [3 1] [4 5] [5 6] [6 4] [3 4]})))
+  (assert (= false (__ #{[:a :b] [:b :c] [:c :d] [:x :y] [:d :a] [:b :e]})))
+  (assert (= true (__ #{[:a :b] [:b :c] [:c :d] [:x :y] [:d :a] [:b :e] [:x :a]}))))
+
+;http://www.4clojure.com/problem/92
+;Read Roman numerals
+(let [__ #(loop [[f & r] (map {\M 1000 \D 500 \C 100 \L 50 \X 10 \V 5 \I 1} %) s 0]
+           (if r
+             (if (< f (first r))
+               (recur r (- s f))
+               (recur r (+ s f)))
+             (+ s f)))]
+  (assert (= 14 (__ "XIV")))
+  (assert (= 827 (__ "DCCCXXVII")))
+  (assert (= 827 (__ "DCCCXXVII")))
+  (assert (= 48 (__ "XLVIII"))))
+
+;http://www.4clojure.com/problem/93
+;Partially Flatten a Sequence
+(let [__ (fn parflat [s]
+           (if (not-any? coll? s) [s] (mapcat parflat s)))]
+  (assert (= (__ [["Do"] ["Nothing"]])
+             [["Do"] ["Nothing"]]))
+  (assert (= (__ [[[[:a :b]]] [[:c :d]] [:e :f]])
+             [[:a :b] [:c :d] [:e :f]]))
+  (assert (= (__ '((1 2)((3 4)((((5 6)))))))
+             '((1 2)(3 4)(5 6)))))
+
+;http://www.4clojure.com/problem/94
+;Game of Life
+(let [__ #(let [nx (juxt inc inc identity dec dec dec identity inc)
+                ny (juxt identity inc inc inc identity dec dec dec)]
+           (for [i (range (count %))]
+             (apply str
+                    (for [j (range (count %))
+                          :let [curr (get-in % [i j])
+                                live-neighbors ((frequencies (map (comp (partial get-in %) vector) (nx i) (ny j))) \#)]]
+                      (case live-neighbors
+                        3 \#
+                        2 (if (= curr \#) \# \space)
+                        \space)))))]
+  (assert (= (__ ["      "
+                  " ##   "
+                  " ##   "
+                  "   ## "
+                  "   ## "
+                  "      "])
+             ["      "
+              " ##   "
+              " #    "
+              "    # "
+              "   ## "
+              "      "]))
+  (assert (= (__ ["     "
+                  "     "
+                  " ### "
+                  "     "
+                  "     "])
+             ["     "
+              "  #  "
+              "  #  "
+              "  #  "
+              "     "]))
+  (assert (= (__ ["      "
+                  "      "
+                  "  ### "
+                  " ###  "
+                  "      "
+                  "      "])
+             ["      "
+              "   #  "
+              " #  # "
+              " #  # "
+              "  #   "
+              "      "])))
+
+;http://www.4clojure.com/problem/95
+;To Tree, or not to Tree
+(let [__ (fn tree? [m]
+           (if (and (coll? m) (= 3 (count m)))
+             (let[[l c r] m] (and l (tree? c) (tree? r)))
+             (nil? m)))]
+  (assert (= (__ '(:a (:b nil nil) nil))
+             true))
+  (assert (= (__ '(:a (:b nil nil)))
+             false))
+  (assert (= (__ [1 nil [2 [3 nil nil] [4 nil nil]]])
+             true))
+  (assert (= (__ [1 [2 nil nil] [3 nil nil] [4 nil nil]])
+             false))
+  (assert (= (__ [1 [2 [3 [4 nil nil] nil] nil] nil])
+             true))
+  (assert (= (__ [1 [2 [3 [4 false nil] nil] nil] nil])
+             false))
+  (assert (= (__ '(:a nil ()))
+             false)))
+
+;http://www.4clojure.com/problem/96
+;Beauty is Symmetry
+(let [__ (fn [[_ b c]]
+           (= b
+              ((fn rev [[k l r :as arg]]
+                 (when arg [k (rev r) (rev l)])) c)))]
+  (assert (= (__ '(:a (:b nil nil) (:b nil nil))) true))
+  (assert (= (__ '(:a (:b nil nil) nil)) false))
+  (assert (= (__ '(:a (:b nil nil) (:c nil nil))) false))
+  (assert (= (__ [1 [2 nil [3 [4 [5 nil nil] [6 nil nil]] nil]]
+                  [2 [3 nil [4 [6 nil nil] [5 nil nil]]] nil]])
+             true))
+  (assert (= (__ [1 [2 nil [3 [4 [5 nil nil] [6 nil nil]] nil]]
+                  [2 [3 nil [4 [5 nil nil] [6 nil nil]]] nil]])
+             false))
+  (assert (= (__ [1 [2 nil [3 [4 [5 nil nil] [6 nil nil]] nil]]
+                  [2 [3 nil [4 [6 nil nil] nil]] nil]])
+             false)))
+
+;http://www.4clojure.com/problem/97
+;Pascal's Triangle
+(let [__ (fn [n]
+           (nth (iterate
+                  (fn[p]
+                    (if (empty? p)
+                      [1]
+                      (conj (into [1] (map (fn [[a b]] (+ a b)) (partition 2 1 p))) 1)))
+                  []) n))]
+  (assert (= (__ 1) [1]))
+  (assert (= (map __ (range 1 6))
+             [[1]
+              [1 1]
+              [1 2 1]
+              [1 3 3 1]
+              [1 4 6 4 1]]))
+  (assert (= (__ 11)
+             [1 10 45 120 210 252 210 120 45 10 1])))
+
+;http://www.4clojure.com/problem/98
+;Equivalence Classes
+(let [__ (fn[f d]
+           (->> (zipmap d (map f d))
+                (group-by second)
+                vals
+                (map #(into #{} (map first %)))
+                (into #{})))]
+  (assert (= (__ #(* % %) #{-2 -1 0 1 2})
+             #{#{0} #{1 -1} #{2 -2}}))
+  (assert (= (__ #(rem % 3) #{0 1 2 3 4 5 })
+             #{#{0 3} #{1 4} #{2 5}}))
+  (assert (= (__ identity #{0 1 2 3 4})
+             #{#{0} #{1} #{2} #{3} #{4}}))
+  (assert (= (__ (constantly true) #{0 1 2 3 4})
+             #{#{0 1 2 3 4}})))
+
+;http://www.4clojure.com/problem/99
+;Product Digits
+(let [__ #(let[p (* %1 %2)]
+           (loop[r (quot p 10) res [(mod p 10)]]
+             (if (pos? r)
+               (recur (quot r 10) (conj res (mod r 10)))
+               (rseq res))))]
+  (assert (= (__ 1 1) [1]))
+  (assert (= (__ 99 9) [8 9 1]))
+  (assert (= (__ 999 99) [9 8 9 0 1])))
+
+;http://www.4clojure.com/problem/100
+;Least Common Multiple
+(let [__ (fn [f & args]
+           (some (fn [n] (when (every? zero? (map #(mod n %) args)) n))
+                 (map #(* f (inc %)) (range))))]
+  (assert (== (__ 2 3) 6))
+  (assert (== (__ 5 3 7) 105))
+  (assert (== (__ 1/3 2/5) 2))
+  (assert (== (__ 3/4 1/6) 3/2))
+  (assert (== (__ 7 5/7 2 3/5) 210)))
 
 ;;http://www.4clojure.com/problem/
 ;;
