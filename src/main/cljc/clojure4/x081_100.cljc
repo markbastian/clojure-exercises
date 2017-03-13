@@ -41,10 +41,21 @@
   (assert (= false (__ true true true)))
   (assert (= true (__ true true true false))))
 
-;TODO
 ;;http://www.4clojure.com/problem/84
 ;Transitive Closure
-#_(let [__ false]
+(let [__ (letfn [(chains [links]
+                   (loop [chain (first links) r (disj links chain) res []]
+                     (let [f (first chain) l (peek chain)
+                           [u v :as link] (some (fn [[u v :as c]] (when (or (= l u) (= v f)) c)) r)]
+                       (cond
+                         link (recur (if (= l u) (conj chain v) (into [u] chain)) (disj r link) res)
+                         (not-empty r) (recur (first r) (disj r (first r)) (conj res chain))
+                         :default (conj res chain)))))
+                 (unroll [chain]
+                   (loop [[f & r] chain res #{}]
+                     (if (not-empty r) (recur r (into res (map (fn [a] [f a]) r))) res)))]
+           (fn [links]
+             (reduce into #{} (map unroll (chains links)))))]
   (assert (let [divides #{[8 4] [9 3] [4 2] [27 9]}]
             (= (__ divides) #{[4 2] [8 4] [8 2] [9 3] [27 9] [27 3]})))
   (assert (let [more-legs
@@ -103,7 +114,6 @@
   (assert (= (__ #{} #{4 5 6}) #{4 5 6}))
   (assert (= (__ #{[1 2] [2 3]} #{[2 3] [3 4]}) #{[1 2] [3 4]})))
 
-;TODO
 ;http://www.4clojure.com/problem/89
 ;Graph Tour
 ;Note: update-in and not= nil were used in place of update and some? due to lack of 4clojure support.
