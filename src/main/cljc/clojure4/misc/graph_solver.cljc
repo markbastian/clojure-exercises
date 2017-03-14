@@ -30,6 +30,8 @@
                                       :queue (conj PersistentQueue/EMPTY [1 :done])
                                       :neighbors {1 [2] 2 [3] 3 [4]}}))))
 
+;9 -> 2 has two minimum paths
+;9 11 22 24 12 6 8 4 2 
 ;(take
 ;  3
 ;  (map
