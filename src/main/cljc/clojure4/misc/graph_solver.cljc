@@ -29,3 +29,37 @@
       (partition 2 1 (iterate expand {:visited {}
                                       :queue (conj PersistentQueue/EMPTY [1 :done])
                                       :neighbors {1 [2] 2 [3] 3 [4]}}))))
+
+;(take
+;  3
+;  (map
+;    (comp seq :queue)
+;    (bfs-expander
+;      (with-meta {:start 1} {:step 0})
+;      (fn [{:keys [start] :as m}]
+;        (let [{:keys [step]} (meta m)]
+;          (map
+;            #(with-meta % {:step (inc step)})
+;            (cond-> [{:op '+ :start (+ 2 start)}
+;                     {:op '* :start (* 2 start)}]
+;                    (even? start)
+;                    (conj {:op '/ :start (/ start 2)}))))))))
+;
+;(loop [[{:keys [visited queue] :as f} & r]
+;       (bfs-expander
+;         (with-meta {:start 1} {:step 0})
+;         (fn [{:keys [start] :as m}]
+;           (let [{:keys [step]} (meta m)]
+;             (map
+;               #(with-meta % {:step (inc step)})
+;               (cond-> [{:op '+ :start (+ 2 start)}
+;                        {:op '* :start (* 2 start)}]
+;                       (even? start)
+;                       (conj {:op '/ :start (/ start 2)}))))))]
+;  (let [s (filter visited [{:op '* :start 6} {:op '+ :start 6} {:op '/ :start 6}])
+;        d (-> queue peek first meta :step)]
+;    (prn (-> queue peek first meta :step))
+;    (prn (first s))
+;    (cond
+;      (and (not-empty s) (> d (-> s first meta :start))) s
+;      :default (recur r))))
