@@ -1,11 +1,18 @@
 (ns clojure4.misc.x106-number-maze
   (:import (clojure.lang PersistentQueue)))
 
-;(defn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))
+;(defn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))
+
+(defn number-maze[a b]
+  (letfn[(nbrs[x] (cond-> [(* 2 x) (+ x 2)] (even? x) (conj (/ x 2))))]
+    (inc (count (take-while #(not (% b)) (iterate #(reduce into #{} (map nbrs %)) #{a}))))))
+
+(number-maze 9 2)
+(number-maze 2 9)
 
 ;With filtering
 (defn number-maze-0 [s g]
-  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))]
+  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))]
     (loop [v #{} q (conj PersistentQueue/EMPTY [s 0])]
       (let [[n i] (peek q)]
         (if (= n g)
@@ -14,7 +21,7 @@
 
 ;Cond
 (defn number-maze-1 [s g]
-  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))]
+  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))]
     (loop [v #{} q (conj PersistentQueue/EMPTY [s 0])]
       (let [[n i] (peek q)]
         (cond
@@ -24,7 +31,7 @@
 
 ;Path + advanced destructuring
 (defn number-maze-2 [s g]
-  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))]
+  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))]
     (loop [v {} [[n :as edge] :as q] (conj PersistentQueue/EMPTY [s :done])]
       (cond
         (v g) [(reverse (take-while (complement #{:done}) (iterate v g))) (count v)]
@@ -34,7 +41,7 @@
 (number-maze-2 7 43)
 
 (defn expand [{v :visited [[n :as edge]] :queue :as m}]
-  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))]
+  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))]
     (cond-> (update m :queue pop) (not (v n))
             (->
               (update :visited conj edge)
@@ -65,7 +72,7 @@
   (iterate expand {:visited {} :queue (conj PersistentQueue/EMPTY [7 :done])}))
 
 (defn iterative-number-maze [s g]
-  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (zero? (mod x 2)) (conj (/ x 2))))
+  (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))
           (expand [{v :visited [[n :as edge]] :queue :as m}]
             (cond-> (update m :queue pop) (not (v n))
                     (->
@@ -77,7 +84,11 @@
       (fn [{:keys [visited]}] (when (visited g) (reverse (take-while (complement #{:done}) (iterate visited g)))))
       (number-maze-solver s))))
 
-(iterative-number-maze 7 92)
+(time (iterative-number-maze 1 4137))
+(time (iterative-number-maze 7 43))
+(time (iterative-number-maze 9 2))
+(time (iterative-number-maze 2 9))
+(time (iterative-number-maze 2 4))
 
 ;(defn expand [{:keys [path visited]}]
 ;  (let [f (peek (peek path))
