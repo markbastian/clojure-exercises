@@ -84,11 +84,7 @@
       (fn [{:keys [visited]}] (when (visited g) (reverse (take-while (complement #{:done}) (iterate visited g)))))
       (number-maze-solver s))))
 
-(time (iterative-number-maze 1 4137))
-(time (iterative-number-maze 7 43))
-(time (iterative-number-maze 9 2))
-(time (iterative-number-maze 2 9))
-(time (iterative-number-maze 2 4))
+
 
 ;(defn expand [{:keys [path visited]}]
 ;  (let [f (peek (peek path))
