@@ -92,6 +92,40 @@
 (let [x java.lang.Class]
   (and (= (class x) x) x))
 
+;http://www.4clojure.com/problem/127
+;Love Triangle
+(let [__
+      (fn [pattern]
+        (letfn [(n-bits [n m] (mapv #(if (bit-test m %) 1 0) (range n)))
+                (decode [s] (mapv (partial n-bits (int (Math/ceil (/ (Math/log (apply max s)) (Math/log 2))))) s))
+                (grow-up [[i j]] [[(inc i) j] [(inc i) (dec j)]])
+                (grow-dn [[i j]] [[(inc i) j] [(inc i) (inc j)]])
+                (grow-a [[i j]] [[(inc i) (inc j)][(inc i) j][(inc i) (dec j)]])
+                (grow-b [[i j]] [[(dec i) (inc j)][(dec i) j][(dec i) (dec j)]])
+                (grow-c [[i j]] [[(inc i) (inc j)][i (inc j)][(dec i) (inc j)]])
+                (grow-d [[i j]] [[(inc i) (dec j)][i (dec j)][(dec i) (dec j)]])
+                (score [rock start f]
+                  (->> #{start}
+                       (iterate (fn[s] (into s (mapcat f s))))
+                       (take-while (fn [r] (every? #(#{1} (get-in rock %)) r)))
+                       rest
+                       last
+                       count))]
+          (let [rock (decode pattern)
+                scores
+                (not-empty
+                  (for [i (range (count rock)) j (range (count (rock i))) f [grow-up grow-dn grow-a grow-b grow-c grow-d]
+                        :let [score (score rock [i j] f)] :when (> score 2)] score))]
+            (when scores (apply max scores)))))]
+  (assert (= 10 (__ [15 15 15 15 15])))
+  (assert (= 15 (__ [1 3 7 15 31])))
+  (assert (= 3 (__ [3 3])))
+  (assert (= 4 (__ [7 3])))
+  (assert (= 6 (__ [17 22 6 14 22])))
+  (assert (= 9 (__ [18 7 14 14 6 3])))
+  (assert (= nil (__ [21 10 21 10])))
+  (assert (= nil (__ [0 31 0 31 0]))))
+
 ;;http://www.4clojure.com/problem/
 ;;
 ;(let [__ false]
