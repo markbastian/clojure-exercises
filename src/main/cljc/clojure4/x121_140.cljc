@@ -82,12 +82,14 @@
                    [b w w e]
                    [b w w w]] 'b))))
 
-;TODO - solve
 ;http://www.4clojure.com/problem/125
 ;Gus' Quinundrum
-;(= (str '__) (__))
+(assert
+  (=
+    (str '(fn [] (let [q (str (quote (fn [] (let [q (str (quote %s))] (format q q)))))] (format q q))))
+    ((fn [] (let [q (str (quote (fn [] (let [q (str (quote %s))] (format q q)))))] (format q q))))))
 
-;http://www.4clojure.com/problem/125
+;http://www.4clojure.com/problem/126
 ;Through the Looking Class
 (let [x java.lang.Class]
   (and (= (class x) x) x))
@@ -125,6 +127,44 @@
   (assert (= 9 (__ [18 7 14 14 6 3])))
   (assert (= nil (__ [21 10 21 10])))
   (assert (= nil (__ [0 31 0 31 0]))))
+
+;http://www.4clojure.com/problem/131
+;Sum Some Set Subsets
+(let [__
+(fn [& items]
+  (letfn [(expand [items sets]
+            (into sets
+                  (for [st sets item items :when ((complement st) item)]
+                    (conj st item))))
+          (combos [items]
+            (let [maxiter (count items)
+                  start (into #{} (map hash-set items))]
+              (into #{} (map #(reduce + %) (nth (iterate (partial expand items) start) maxiter)))))]
+    (some? (not-empty (apply clojure.set/intersection (map combos items))))))]
+  (= true  (__ #{-1 1 99}
+               #{-2 2 888}
+               #{-3 3 7777}))
+  (assert (= false (__ #{1}
+                       #{2}
+                       #{3}
+                       #{4})))
+  (assert (= true  (__ #{1})))
+  (assert (= false (__ #{1 -3 51 9}
+                       #{0}
+                       #{9 2 81 33})))
+  (assert (= true  (__ #{1 3 5}
+                       #{9 11 4}
+                       #{-3 12 3}
+                       #{-3 4 -2 10})))
+  (assert (= false (__ #{-1 -2 -3 -4 -5 -6}
+                       #{1 2 3 4 5 6 7 8 9})))
+  (assert (= true  (__ #{1 3 5 7}
+                       #{2 4 6 8})))
+  (assert (= true  (__ #{-1 3 -5 7 -9 11 -13 15}
+                       #{1 -3 5 -7 9 -11 13 -15}
+                       #{1 -1 2 -2 4 -4 8 -8})))
+  (assert (= true  (__ #{-10 9 -8 7 -6 5 -4 3 -2 1}
+                       #{10 -9 8 -7 6 -5 4 -3 2 -1}))))
 
 ;;http://www.4clojure.com/problem/
 ;;
