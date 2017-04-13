@@ -41,16 +41,6 @@
             :when (not-empty (clojure.set/difference r c))]
         (simplify r))))))
 
-(boolean-reduce
-  #{#{'a 'B 'C 'd}
-    #{'A 'b 'c 'd}
-    #{'A 'b 'c 'D}
-    #{'A 'b 'C 'd}
-    #{'A 'b 'C 'D}
-    #{'A 'B 'c 'd}
-    #{'A 'B 'c 'D}
-    #{'A 'B 'C 'd}})
-
 (def __
   (fn [baf]
     (loop [minterms baf equivalences []]
@@ -71,27 +61,6 @@
                 :let [c (reduce into #{} (remove #{r} equivalences))]
                 :when (not-empty (clojure.set/difference r c))]
             (reduce clojure.set/intersection r)))))))
-
-(__ #{#{'a 'B 'C 'd}
-      #{'A 'b 'c 'd}
-      #{'A 'b 'c 'D}
-      #{'A 'b 'C 'd}
-      #{'A 'b 'C 'D}
-      #{'A 'B 'c 'd}
-      #{'A 'B 'c 'D}
-      #{'A 'B 'C 'd}})
-
-(= (__ #{#{'a 'B 'C 'd}
-         #{'A 'b 'c 'd}
-         #{'A 'b 'c 'D}
-         #{'A 'b 'C 'd}
-         #{'A 'b 'C 'D}
-         #{'A 'B 'c 'd}
-         #{'A 'B 'c 'D}
-         #{'A 'B 'C 'd}})
-   #{#{'A 'c}
-     #{'A 'b}
-     #{'B 'C 'd}})
 
 (assert
   (= (__ #{#{'a 'B 'C 'd}
