@@ -1,4 +1,5 @@
-(ns clojure4.unsolved.x138-squares-squared)
+(ns clojure4.unsolved.x138-squares-squared
+  (:require [clojure.pprint :as pp]))
 
 (defn n->d [n]
   (loop [q (quot n 10) res (list (mod n 10))]
@@ -19,50 +20,66 @@
         r (vec (interpose \space (repeat n \space)))]
     {:start [(dec n) (dec n)]
      :grid (vec (repeat (count r) r))
-     :dir [1 1]}))
+     :dir [-1 1]}))
 
 (def dirs {[1 1] [1 -1]
            [1 -1] [-1 -1]
            [-1 -1] [-1 1]
            [-1 1] [1 1]})
 
-(defn step [{:keys [start dir] :as m} v]
-  (-> m
-      (update :grid assoc-in start v)
-      (update :start #(mapv + % dir))
-      (update :dir dirs)))
+(defn step [{:keys [grid start dir] :as m} v]
+  (let [ndir (if (= \space (get-in grid (mapv + start (dirs dir)))) (dirs dir) dir)]
+    (-> m
+        (update :grid assoc-in start v)
+        (assoc :dir ndir)
+        (update :start #(mapv + % ndir)))))
 
-(let [s (seq-digs 2 256)]
-  (reduce
-    step
-    (grid s) s))
+(defn sqsq [s f]
+  (->> (let [s (seq-digs s f)]
+         (reduce
+           step
+           (grid s) s))
+       :grid
+       (map #(clojure.string/join %))
+       (clojure.string/join "\n")))
 
-;(def __)
-;
-;(= (__ 2 2) ["2"])
-;
-;(= (__ 2 4) [" 2 "
-;             "* 4"
-;             " * "])
-;
-;(= (__ 3 81) [" 3 "
-;              "1 9"
-;              " 8 "])
-;
-;(= (__ 4 20) [" 4 "
-;              "* 1"
-;              " 6 "])
-;
-;(= (__ 2 256) ["  6  "
-;               " 5 * "
-;               "2 2 *"
-;               " 6 4 "
-;               "  1  "])
-;
-;(= (__ 10 10000) ["   0   "
-;                  "  1 0  "
-;                  " 0 1 0 "
-;                  "* 0 0 0"
-;                  " * 1 * "
-;                  "  * *  "
-;                  "   *   "])
+(sqsq 2 256)
+
+(def __
+  (letfn []
+    (fn [s f]
+      (->> (let [s (seq-digs s f)]
+             (reduce
+               step
+               (grid s) s))
+           :grid
+           (map #(clojure.string/join %))
+           (clojure.string/join "\n")))))
+
+(= (__ 2 2) ["2"])
+
+(= (__ 2 4) [" 2 "
+             "* 4"
+             " * "])
+
+(= (__ 3 81) [" 3 "
+              "1 9"
+              " 8 "])
+
+(= (__ 4 20) [" 4 "
+              "* 1"
+              " 6 "])
+
+(= (__ 2 256) ["  6  "
+               " 5 * "
+               "2 2 *"
+               " 6 4 "
+               "  1  "])
+
+(= (__ 10 10000) ["   0   "
+                  "  1 0  "
+                  " 0 1 0 "
+                  "* 0 0 0"
+                  " * 1 * "
+                  "  * *  "
+                  "   *   "])
