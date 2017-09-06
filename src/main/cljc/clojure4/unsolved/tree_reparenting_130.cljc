@@ -14,54 +14,11 @@
 
 (def goal 'c)
 
-(defn branch? [node]
-  (prn (str "b: " node))
-  (prn (not= node goal))
-  (and
-    (not= node goal)))
-
-(defn children [node]
-  (prn (str "c: " node))
-  (identity node))
-
-(tree-seq branch? children t)
-
-(take-while
-  #(not= goal %)
-  (tree-seq seq? identity t))
-
-(loop [f (first t) q (rest t)]
-  (prn f)
-  (if f
-    (let [[n & r] (first q)]
-      (recur n (into (rest q) r)))
-    nil))
-
-(let [[rt l r] t]
-  r)
-
-;(defn x [[rt l r :as b] o g]
-;  (cond
-;    (= rt g) (rt l r o)
-;    (nil? l) (list rt)
-;    :default ))
-
-(defn x [[f & r :as b] p g]
+(defn doit [goal [p l r] v]
   (cond
-    (= f g) (cons b p)
-    (empty? r) b
-    :default (map #(x % (cons f p) g) r)))
+    (nil? p) nil
+    (= p goal) [p l r v]
+    :default (or (doit goal l (into v [p r]))
+                 (doit goal r (into v [p l])))))
 
-#_(= '(e (t (a)))
-   (__ 'e '(a (t (e)))))
-
-(x t () 'c)
-
-(defn x [[n l r] g]
-  (if (= n g)
-    n
-    (cond-> (list n (when r (x r g))) l (conj (x l g)))))
-
-
-
-
+(doit 'b t [])
