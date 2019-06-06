@@ -105,6 +105,25 @@
   (assert (= (__ [2 3 3 4 5]) [3 4 5]))
   (assert (= (__ [7 6 5 4]) [])))
 
+;http://www.4clojure.com/problem/53
+;Longest Increasing Sub-Seq redux
+(let [__ (fn[sq]
+           (let [s (->> (partition 2 1 sq)
+                        (partition-by (fn [[a b]] (> b a)))
+                        (apply max-key count))]
+             (cons (ffirst s) (map last s))))]
+  (assert (= (__ [1 0 1 2 3 0 4 5]) [0 1 2 3]))
+  (assert (= (__ [5 6 1 3 2 7]) [5 6]))
+  (assert (= (__ [2 3 3 4 5]) [3 4 5]))
+  (assert (= (__ [7 6 5 4]) [])))
+
+#_
+(let [v [1 0 1 2 3 0 4 5]
+      s (->> (partition 2 1 v)
+             (partition-by (fn [[a b]] (> b a)))
+             (apply max-key count))]
+  (cons (ffirst s) (map last s)))
+
 ;http://www.4clojure.com/problem/54
 ;Partition a Sequence
 (let [__ (fn [n s]
