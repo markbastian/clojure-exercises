@@ -5,8 +5,8 @@
 (def empty-queue #?(:clj PersistentQueue/EMPTY :cljs #queue []))
 
 ;Produce only the number of steps.
-(defn number-maze[s g]
-  (letfn[(nbrs[x] (cond-> [(* 2 x) (+ x 2)] (even? x) (conj (/ x 2))))]
+(defn number-maze [s g]
+  (letfn [(nbrs [x] (cond-> [(* 2 x) (+ x 2)] (even? x) (conj (/ x 2))))]
     (inc (count (take-while #(not (% g)) (iterate #(reduce into #{} (map nbrs %)) #{s}))))))
 
 ;(time (number-maze 1 4137))
@@ -33,10 +33,10 @@
 ;(time (number-path 2 2))
 
 ;Return them all - very slow
-(defn number-paths[s g]
-  (letfn[(nbrs[x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
-         (expand [paths] (for [path paths p (nbrs (peek path))
-                               :when (not-any? #{(second p)} path)] (into path p)))]
+(defn number-paths [s g]
+  (letfn [(nbrs [x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
+          (expand [paths] (for [path paths p (nbrs (peek path))
+                                :when (not-any? #{(second p)} path)] (into path p)))]
     (->> (iterate expand [[s]])
          (some #(when (some (comp #{g} peek) %) %))
          (filter (comp #{g} peek)))))
@@ -49,11 +49,11 @@
 ;(time (number-paths 2 2))
 
 ;Return them all
-(defn fast-number-paths[s g]
-  (letfn[(nbrs[x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
-         (expand [{:keys [paths visited]}]
-           (let [p (for [path paths n (remove (comp visited second) (nbrs (peek path)))] (into path n))]
-             {:paths p :visited (into visited (map peek p))}))]
+(defn fast-number-paths [s g]
+  (letfn [(nbrs [x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
+          (expand [{:keys [paths visited]}]
+            (let [p (for [path paths n (remove (comp visited second) (nbrs (peek path)))] (into path n))]
+              {:paths p :visited (into visited (map peek p))}))]
     (let [pred (comp #{g} peek)]
       (->> (iterate expand {:paths [[s]] :visited #{s}})
            (some (fn [{:keys [paths]}] (when (some pred paths) paths)))
@@ -70,7 +70,7 @@
 ; assemble/dissassemble and debug Clojure forms.
 
 ;How the front grows
-(defn nbrs[x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
+(defn nbrs [x] (cond-> [['* (* 2 x)] ['+ (+ x 2)]] (even? x) (conj ['/ (/ x 2)])))
 
 ;One generation/step of growth - Must be self-similar for iteration
 (defn expand-step [{:keys [paths visited]}]
@@ -86,7 +86,7 @@
 (defn stop-cond [pred {:keys [paths]}] (when (some pred paths) paths))
 
 ;The entire solution
-(defn fast-number-paths-deconstructed[s g]
+(defn fast-number-paths-deconstructed [s g]
   (let [pred (comp #{g} peek)]
     (->> (expand-from s)
          (some (partial stop-cond pred))
@@ -106,9 +106,9 @@
             (update :visited conj edge)
             (update :queue into (map (fn [x] [x n]) (nbrs n))))))
 
-(defn bfs-expander [{:keys[start neighbors]}]
-  (iterate expand {:visited {}
-                   :queue (conj empty-queue [start :done])
+(defn bfs-expander [{:keys [start neighbors]}]
+  (iterate expand {:visited   {}
+                   :queue     (conj empty-queue [start :done])
                    :neighbors neighbors}))
 
 (defn rsolve-path [goal {:keys [visited]}]
@@ -160,9 +160,11 @@
     :goal (find-cell dungeon \T)
     :neighbors (partial dungeon-neigbors dungeon)))
 
-(if (not= :no-solution dungeon-path)
-  (map cs/join
-       (reduce #(assoc-in %1 %2 \.)
-               (mapv vec dungeon)
-               (rest (butlast dungeon-path))))
-  "No solution!")
+(comment
+  (if (not= :no-solution dungeon-path)
+    (map cs/join
+         (reduce #(assoc-in %1 %2 \.)
+                 (mapv vec dungeon)
+                 (rest (butlast dungeon-path))))
+    "No solution!")
+  )
