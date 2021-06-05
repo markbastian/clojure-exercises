@@ -17,16 +17,27 @@
 
 (defn lock-cell [[board unknowns] cell v]
   [(assoc-in board cell v)
-   (reduce (fn [u n] (cond-> u (u n) (update n disj v)))
-           (dissoc unknowns cell) (neighbors cell))])
+   (reduce
+     (fn [u n] (cond-> u (u n) (update n disj v)))
+     (dissoc unknowns cell)
+     (neighbors cell))])
 
-(defn initialize [b]
+(defn initialize [initial-board]
   (reduce
-    (fn [u c] (if-let [v (valid-values (get-in b c))] (lock-cell u c v) u))
-    [b (zipmap all-cells (repeat valid-values))] all-cells))
+    (fn [[board :as soln] cell]
+      (if-let [value (valid-values (get-in board cell))]
+        (lock-cell soln cell value)
+        soln))
+    [initial-board (zipmap all-cells (repeat valid-values))]
+    all-cells))
+
+(comment
+  (initialize ex/easy))
 
 (defn solve-step [[_ unknowns :as soln]]
+  ;Get the most constrained cell
   (let [[best-cell best-values] (apply min-key (comp count val) unknowns)]
+    ;produce a vector of solutions with that cell locked
     (for [v best-values] (lock-cell soln best-cell v))))
 
 (defn solve [board]
@@ -35,6 +46,9 @@
       (and (empty? unknowns) (every? #(every? integer? %) board)) board
       (nil? f) f
       :default (recur (into r (solve-step f))))))
+
+(comment
+  (solve-step (initialize ex/brutal)))
 
 (defn valid-cell? [board cell]
   (not-any? #{(get-in board cell)}

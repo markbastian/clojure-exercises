@@ -5,8 +5,8 @@
     (map first (iterate step [0N 1N]))))
 
 (def pascals-triangle-seq
-  (letfn [(step [v] (map (partial apply +) (cons '(1) (partition-all 2 1 v))))]
-    (iterate step '(1))))
+  (letfn [(step [v] (map (partial apply +) (cons '(1N) (partition-all 2 1 v))))]
+    (iterate step '(1N))))
 
 (def prime-seq
   (letfn [(step [[prime & r]] (remove #(zero? (mod % prime)) r))]

@@ -8,30 +8,60 @@
 
 (defn d->n [d] (reduce #(+ (* 10 %1) %2) d))
 
-(defn pal-up [c op digs]
-  (let [inc-digs (->> digs d->n op n->d)
+(defn pal-up [c op half-digits]
+  (let [inc-digs (->> half-digits d->n op n->d)
         post-digs (reverse inc-digs)]
     (d->n
       (into
-        (if (= (count digs) (count inc-digs))
+        (if (= (count half-digits) (count inc-digs))
           inc-digs
           (vec (butlast inc-digs)))
         (if (even? c)
           post-digs
           (rest post-digs))))))
 
-(defn pal [n]
+(defn next-palindromic-number [n]
   (let [d (n->d n)
         c (count d)
         i (/ (if (even? c) c (inc c)) 2)
+        ;Get the first and last half of the digits, inclusive of the central digit in both cases.
         pre-digs (take i d)
         rem-digs (take i (reverse d))]
+    (println {:n n
+              :pre pre-digs
+              :rem rem-digs
+              :x (< (d->n pre-digs) (d->n rem-digs))})
+    ;If the number is a palindrome or the trailing digits are greater than the
+    ;leading digits, we need increase the center digit.
     (if (or (= pre-digs rem-digs)
             (< (d->n pre-digs) (d->n rem-digs)))
       (pal-up c inc pre-digs)
+      ;Otherwise reverse the truncated digits
       (pal-up c identity pre-digs))))
 
-(defn pal? [n] (let [digs (n->d n)] (= digs (reverse digs))))
+(comment
+  (next-palindromic-number 141)
+  (next-palindromic-number 147)
+  (next-palindromic-number 741)
+  (next-palindromic-number 21)
+  (next-palindromic-number 12)
+  )
+
+(defn palindromic-number? [n]
+  (let [digs (n->d n)]
+    (= digs (reverse digs))))
+
+(comment
+  (palindromic-number? 123)
+  (palindromic-number? 121)
+  )
+
+(defn palindrome-seq [from]
+  (let [start (if (palindromic-number? from) from (next-palindromic-number from))]
+    (iterate next-palindromic-number start)))
+
+(comment
+  (take 10 (palindrome-seq 100)))
 
 ;The only thing left is the initial value. Anything not palindromic shouldn't
 ;be in the seq. Also, 160 -> 161 and 162 -> 171.
