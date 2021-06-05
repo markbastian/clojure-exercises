@@ -7,4 +7,5 @@
 (defn r3 [s] (cs/replace s #"UU" ""))
 (def rules (juxt r0 r1 r2 r3))
 
-(take 7 (iterate #(into % (mapcat rules %)) #{"MI"}))
+(comment
+  (take 7 (iterate #(into % (mapcat rules %)) #{"MI"})))

@@ -119,17 +119,18 @@
           (or (rsolve-path goal m) (when (empty? queue) :no-solution)))
         (bfs-expander ic)))
 
-;Solve today's problem
-(bfs-solve
-  :start 7
-  :goal 43
-  :neighbors (fn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2)))))
+(comment
+  ;Solve today's problem
+  (bfs-solve
+    :start 7
+    :goal 43
+    :neighbors (fn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2)))))
 
-;Use another function to generate neighbors
-(bfs-solve
-  :start 1
-  :goal 7
-  :neighbors {1 [2] 2 [3 5] 3 [4]})
+  ;Use another function to generate neighbors
+  (bfs-solve
+    :start 1
+    :goal 7
+    :neighbors {1 [2] 2 [3 5] 3 [4]}))
 
 ;Get creative....
 (def dungeon
@@ -154,13 +155,13 @@
 (defn dungeon-neigbors [d c]
   (filter #(#{\space \S \T} (get-in d %)) (square-neighbors c)))
 
-(def dungeon-path
-  (bfs-solve
-    :start (find-cell dungeon \S)
-    :goal (find-cell dungeon \T)
-    :neighbors (partial dungeon-neigbors dungeon)))
-
 (comment
+  (def dungeon-path
+    (bfs-solve
+      :start (find-cell dungeon \S)
+      :goal (find-cell dungeon \T)
+      :neighbors (partial dungeon-neigbors dungeon)))
+
   (if (not= :no-solution dungeon-path)
     (map cs/join
          (reduce #(assoc-in %1 %2 \.)

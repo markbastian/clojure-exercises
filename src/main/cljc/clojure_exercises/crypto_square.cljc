@@ -12,5 +12,6 @@
          (apply map (comp cs/join vector))
          (cs/join " "))))
 
-(prn (crypto-square s))
-(prn (crypto-square "If man was meant to stay on the ground god would have given us roots"))
+(comment
+  (prn (crypto-square s))
+  (prn (crypto-square "If man was meant to stay on the ground god would have given us roots")))

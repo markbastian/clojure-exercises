@@ -20,6 +20,7 @@
 
 (comment
   (int->digits -19)
+  (int->digits 24320)
   (int->digits 0)
   (int->digits 43753311360000250 12)
   (-> (int->digits 43753311360000250 12) digits->str)
