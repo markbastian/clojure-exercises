@@ -8,9 +8,9 @@
             (update :visited conj edge)
             (update :queue into (map (fn [x] [x n]) (nbrs n))))))
 
-(defn bfs-expander [{:keys[start neighbors]}]
-  (iterate expand {:visited {}
-                   :queue (conj PersistentQueue/EMPTY [start :done])
+(defn bfs-expander [{:keys [start neighbors]}]
+  (iterate expand {:visited   {}
+                   :queue     (conj PersistentQueue/EMPTY [start :done])
                    :neighbors neighbors}))
 
 (defn rsolve-path [goal {:keys [visited]}]
@@ -21,15 +21,16 @@
           (or (rsolve-path goal m) (when (empty? queue) :no-solution)))
         (bfs-expander ic)))
 
-(bfs-solve
-  :start 7
-  :goal 43
-  :neighbors (fn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2)))))
+(comment
+  (bfs-solve
+    :start 7
+    :goal 43
+    :neighbors (fn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2)))))
 
-(bfs-solve
-  :start 1
-  :goal 7
-  :neighbors {1 [2] 2 [3] 3 [4]})
+  (bfs-solve
+    :start 1
+    :goal 7
+    :neighbors {1 [2] 2 [3] 3 [4]}))
 
 (def dungeon
   ["XXXXXXXX XXXXXXXX"
@@ -50,18 +51,19 @@
        ((juxt inc identity dec identity) i)
        ((juxt identity inc identity dec) j)))
 
-(def dungeon-path
-  (bfs-solve
-    :start (find-cell dungeon \S)
-    :goal (find-cell dungeon \T)
-    :neighbors (fn [c] (filter #(#{\space \S \T} (get-in dungeon %)) (n c)))))
+(comment
+  (def dungeon-path
+    (bfs-solve
+      :start (find-cell dungeon \S)
+      :goal (find-cell dungeon \T)
+      :neighbors (fn [c] (filter #(#{\space \S \T} (get-in dungeon %)) (n c)))))
 
-(if (not= :no-solution dungeon-path)
-  (map cs/join
-     (reduce #(assoc-in %1 %2 \@)
-             (mapv vec dungeon)
-             (rest (butlast dungeon-path))))
-  "No solution!")
+  (if (not= :no-solution dungeon-path)
+    (map cs/join
+         (reduce #(assoc-in %1 %2 \@)
+                 (mapv vec dungeon)
+                 (rest (butlast dungeon-path))))
+    "No solution!"))
 
 ;(take 6 (map :visited (bfs-expander 1 {1 [2] 2 [3] 3 [4]})))
 ;(time (iterative-number-maze 1 4137))

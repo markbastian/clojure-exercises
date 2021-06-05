@@ -3,12 +3,13 @@
 
 ;(defn nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))
 
-(defn number-maze[a b]
-  (letfn[(nbrs[x] (cond-> [(* 2 x) (+ x 2)] (even? x) (conj (/ x 2))))]
+(defn number-maze [a b]
+  (letfn [(nbrs [x] (cond-> [(* 2 x) (+ x 2)] (even? x) (conj (/ x 2))))]
     (inc (count (take-while #(not (% b)) (iterate #(reduce into #{} (map nbrs %)) #{a}))))))
 
-(number-maze 9 2)
-(number-maze 2 9)
+(comment
+  (number-maze 9 2)
+  (number-maze 2 9))
 
 ;With filtering
 (defn number-maze-0 [s g]
@@ -38,7 +39,8 @@
         (v n) (recur v (pop q))
         :default (recur (conj v edge) (into (pop q) (map (fn [x] [x n]) (nbrs n))))))))
 
-(number-maze-2 7 43)
+(comment
+  (number-maze-2 7 43))
 
 (defn expand [{v :visited [[n :as edge]] :queue :as m}]
   (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))]
@@ -59,17 +61,18 @@
 
 (defn n-steps [s g] (dec (count (solve-path s g))))
 
-(solve-path 7 43)
-(n-steps 7 43)
+(comment
+  (solve-path 7 43)
+  (n-steps 7 43)
 
-(let [[a [{:keys [visited]} & r]](split-with
-             (fn [{:keys [visited]}] (not (visited 43)))
-             (iterate expand {:visited {} :queue (conj PersistentQueue/EMPTY [7 :done])}))]
-  (reverse (take-while (complement #{:done}) (iterate visited 43))))
+  (let [[a [{:keys [visited]} & r]] (split-with
+                                      (fn [{:keys [visited]}] (not (visited 43)))
+                                      (iterate expand {:visited {} :queue (conj PersistentQueue/EMPTY [7 :done])}))]
+    (reverse (take-while (complement #{:done}) (iterate visited 43))))
 
-(some
-  (fn [{:keys [visited]}] (when (visited 43) (reverse (take-while (complement #{:done}) (iterate visited 43)))))
-  (iterate expand {:visited {} :queue (conj PersistentQueue/EMPTY [7 :done])}))
+  (some
+    (fn [{:keys [visited]}] (when (visited 43) (reverse (take-while (complement #{:done}) (iterate visited 43)))))
+    (iterate expand {:visited {} :queue (conj PersistentQueue/EMPTY [7 :done])})))
 
 (defn iterative-number-maze [s g]
   (letfn [(nbrs [x] (cond-> [(+ 2 x) (* 2 x)] (even? x) (conj (/ x 2))))
