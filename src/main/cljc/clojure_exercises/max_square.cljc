@@ -25,4 +25,9 @@
       [i j])))
 
 (comment
+  (let [matrix m]
+    (for [i (range 1 (count matrix))
+          j (range 1 (count (first matrix)))]
+      [i j]))
+
   (:max-square (max-square m)))
