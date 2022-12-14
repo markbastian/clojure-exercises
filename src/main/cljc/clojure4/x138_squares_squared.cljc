@@ -14,10 +14,10 @@
        (filter #(zero? (rem (Math/sqrt (count %)) 1)))
        first))
 
-(def dirs {[1 1] [1 -1]
-           [1 -1] [-1 -1]
+(def dirs {[1 1]   [1 -1]
+           [1 -1]  [-1 -1]
            [-1 -1] [-1 1]
-           [-1 1] [1 1]})
+           [-1 1]  [1 1]})
 
 (defn step [{:keys [grid start dir] :as m} v]
   (let [ndir (if (get-in grid (mapv + start (dirs dir))) dir (dirs dir))]
@@ -40,10 +40,11 @@
 (defn sqsq [s f]
   (->> (seq-digs s f) solve-grid m->g))
 
-;(print (sqsq 2 4))
-;(prn (sqsq 2 256))
-;(println (sqsq 3 81))
-;(print (sqsq 10 10000))
+(comment
+  (print (sqsq 2 4))
+  (prn (sqsq 2 256))
+  (println (sqsq 3 81))
+  (print (sqsq 10 10000)))
 
 (def __
   (let [dirs {[1 1] [1 -1] [1 -1] [-1 -1] [-1 -1] [-1 1] [-1 1] [1 1]}]
